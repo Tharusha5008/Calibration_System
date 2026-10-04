@@ -1,0 +1,5 @@
+{
+  "trained_rows": 24000,
+  "mean_absolute_error": 0.19103168983020294,
+  "derived_classification_accuracy": 0.9158333333333334
+}
