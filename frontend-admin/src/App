@@ -1,0 +1,69 @@
+import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-dom';
+import Login from './pages/Login.jsx';
+import UsersCRUD from './pages/UsersCRUD.jsx';
+import TechniciansCRUD from './pages/TechniciansCRUD.jsx';
+import CertificateApproval from './pages/CertificateApproval.jsx';
+import EquipmentDashboard from './pages/EquipmentDashboard.jsx';
+import Reports from './pages/Reports.jsx';
+
+function useAdminAuth() {
+  const [user, setUser] = useState(() => {
+    const raw = sessionStorage.getItem('admin_user');
+    return raw ? JSON.parse(raw) : null;
+  });
+  return { user, setUser };
+}
+
+function Shell({ user, onLogout, children }) {
+  return (
+    <div>
+      <header className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid var(--color-border)' }}>
+        <div style={{ fontWeight: 700 }}>CALIBRATE<span style={{ color: 'var(--color-accent)' }}>.</span>OS Admin</div>
+        <nav style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+          <NavLink to="/dashboard" style={{ color: 'var(--color-text-muted)', textDecoration: 'none' }}>Dashboard</NavLink>
+          <NavLink to="/reports" style={{ color: 'var(--color-text-muted)', textDecoration: 'none' }}>Reports</NavLink>
+          <NavLink to="/certificates" style={{ color: 'var(--color-text-muted)', textDecoration: 'none' }}>Certificate Approvals</NavLink>
+          <NavLink to="/technicians" style={{ color: 'var(--color-text-muted)', textDecoration: 'none' }}>Technicians</NavLink>
+          <NavLink to="/users" style={{ color: 'var(--color-text-muted)', textDecoration: 'none' }}>Users</NavLink>
+          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{user?.fullName}</span>
+          <button className="btn secondary" onClick={onLogout}>Logout</button>
+        </nav>
+      </header>
+      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '1.5rem' }}>{children}</main>
+    </div>
+  );
+}
+
+export default function App() {
+  const { user, setUser } = useAdminAuth();
+
+  const logout = () => {
+    sessionStorage.removeItem('admin_token');
+    sessionStorage.removeItem('admin_user');
+    setUser(null);
+  };
+
+  if (!user) {
+    return (
+      <BrowserRouter>
+        <Login onLogin={setUser} />
+      </BrowserRouter>
+    );
+  }
+
+  return (
+    <BrowserRouter>
+      <Shell user={user} onLogout={logout}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<EquipmentDashboard />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/certificates" element={<CertificateApproval />} />
+          <Route path="/technicians" element={<TechniciansCRUD />} />
+          <Route path="/users" element={<UsersCRUD />} />
+        </Routes>
+      </Shell>
+    </BrowserRouter>
+  );
+}
